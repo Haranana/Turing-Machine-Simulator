@@ -38,6 +38,17 @@ public class Tape {
         head.value = value;
     }
 
+    //places text onto tape, starting from current head position and moving right
+    //doesn't change head position
+    public void placeText(String input){
+        TapeCell originalHead = head;
+        for(char inputChar : input.toCharArray()){
+            writeOnHead(inputChar);
+            moveHeadRight();
+        }
+        head = originalHead;
+    }
+
     private static class TapeCell{
         private char value;
         private TapeCell leftCell = null;

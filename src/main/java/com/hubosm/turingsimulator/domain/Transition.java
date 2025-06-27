@@ -15,6 +15,18 @@ public class Transition {
     private char writeSymbol;
     private TransitionAction action;
 
+    public static TransitionAction stringToAction(String action){
+        if(action.equals("R")){
+            return TransitionAction.RIGHT;
+        }else if(action.equals("L")){
+            return TransitionAction.LEFT;
+        }else {
+            return TransitionAction.STAY;
+        }
+    }
+
+
+
     public enum TransitionAction{
         RIGHT,
         LEFT,
