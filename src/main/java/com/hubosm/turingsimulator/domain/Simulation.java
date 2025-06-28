@@ -3,18 +3,24 @@ package com.hubosm.turingsimulator.domain;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class Simulation {
-    @Getter
     private List<SimulationStep> steps;
 
     @Setter
-    @Getter
     private Boolean output;
 
-    public void addStep(SimulationStep step){
-        steps.add(step);
+    public Simulation() {
+        this.steps = new ArrayList<>();
     }
+
+    public void addStep(SimulationStep step){
+        this.steps.add(step);
+    }
+
+
 
 }

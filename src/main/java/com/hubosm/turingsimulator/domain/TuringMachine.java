@@ -21,27 +21,33 @@ public class TuringMachine {
     private TmProgram program;
     private Tape tape;
 
-    public TuringMachine(String initialState, String acceptState, Collection<String> program, Character separator){
+    public TuringMachine(String initialState, String acceptState, String rejectState, Collection<String> program, Character separator){
         String regex    = Pattern.quote(String.valueOf(separator));
+        this.states = new HashSet<>();
         this.tape = new Tape('_');
         this.program = new TmProgram();
         this.acceptState = new State(acceptState);
+        this.rejectState = new State(rejectState);
         this.initialState = new State(initialState);
         states.add(this.acceptState);
         states.add(this.initialState);
 
-        for(String trans : program){
-            List<String> parts = List.of(trans.split(regex, -1));
-            State currentState = new State(parts.get(0));
-            String readSymbol = parts.get(1);
-            State nextState = new State(parts.get(2));
-            String writeSymbol = parts.get(3);
-            String action = parts.get(4);
+        try {
+            for (String trans : program) {
+                List<String> parts = List.of(trans.split(regex, -1));
+                State currentState = new State(parts.get(0));
+                String readSymbol = parts.get(1);
+                State nextState = new State(parts.get(2));
+                String writeSymbol = parts.get(3);
+                String action = parts.get(4);
 
-            states.add(currentState);
-            states.add(nextState);
+                states.add(currentState);
+                states.add(nextState);
 
-            this.program.addTransition(new Transition(currentState, readSymbol.charAt(0), nextState, writeSymbol.charAt(0), Transition.stringToAction(action)));
+                this.program.addTransition(new Transition(currentState, readSymbol.charAt(0), nextState, writeSymbol.charAt(0), Transition.stringToAction(action)));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error in loading transitions");
         }
     }
 
@@ -58,11 +64,21 @@ public class TuringMachine {
 
         State currentState = initialState;
         char readChar = tape.readHead();
+        Transition currentTransition;
         while(true){
 
-            Transition currentTransition = program.getTransitionByLeftSide(currentState, readChar).orElseThrow();
+            //Find whole Transition based on current state and character read by head
+            readChar = tape.readHead();
+            try{
+                currentTransition = program.getTransitionByLeftSide(currentState, readChar).orElseThrow();
+            } catch (Exception e) {
+                throw new RuntimeException("call to non-existing transition from: " + currentState.getName() + " ; " + readChar);
+            }
+
+            //Write character under head based on Transition
             tape.writeOnHead(currentTransition.getWriteSymbol());
 
+            //Move head based on found Transition
             Transition.TransitionAction simulationAction = currentTransition.getAction();
             switch (currentTransition.getAction()){
                 case RIGHT:
@@ -77,17 +93,21 @@ public class TuringMachine {
                     break;
             }
 
+            //modify current state and save simulation step
             currentState = currentTransition.getNextState();
             resultSimulation.addStep(new SimulationStep(currentState, simulationAction));
-            if(currentState == acceptState){
+
+            //decide if program should be stopped
+            if(currentState.equals(acceptState)){
                 resultSimulation.setOutput(true);
                 break;
-            }else if(currentState == rejectState){
+            }else if(currentState.equals(rejectState)){
                 resultSimulation.setOutput(false);
                 break;
             }else if(SimulationRules.maxSteps == resultSimulation.getSteps().size()){
                 break;
             }
+
         }
         return resultSimulation;
     }
