@@ -1,5 +1,5 @@
 package com.hubosm.turingsimulator.domain;
 
-public class SimulationRules {
+public class SimulationConfig {
     public static int maxSteps = 50;
 }

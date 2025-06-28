@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 public class Simulation {
-    private List<SimulationStep> steps;
+    private final List<SimulationStep> steps;
 
     @Setter
     private Boolean output;

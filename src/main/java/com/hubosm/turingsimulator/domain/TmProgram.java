@@ -3,26 +3,28 @@ package com.hubosm.turingsimulator.domain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import com.hubosm.turingsimulator.utils.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-@Getter
-@Setter
+
 public class TmProgram {
-    List<Transition> transitions;
+    private final Map<Pair<State, Character> , Transition> indexedTransitions;
+    @Getter
+    private final List<Transition> transitions;
 
     public TmProgram(){
         this.transitions = new ArrayList<>();
+        this.indexedTransitions = new HashMap<>();
     }
 
     public void addTransition(Transition transition){
+        indexedTransitions.put(new Pair<>(transition.getCurrentState(), transition.getReadSymbol()) , transition);
         transitions.add(transition);
     }
 
     public Optional<Transition> getTransitionByLeftSide(State state, char readSymbol){
-        return transitions.stream().filter(t -> t.getCurrentState().equals(state) && t.getReadSymbol() == readSymbol).findFirst();
+        return Optional.ofNullable(indexedTransitions.get(new Pair<>(state, readSymbol)));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.hubosm.turingsimulator.domain;
 
+import com.hubosm.turingsimulator.exceptions.TuringMachineException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,7 @@ public class TuringMachine {
 
         try {
             for (String trans : program) {
+                //in future there may be different separator beetwen left and right side of Transition, so here regex is used for split instead of simply using separator
                 List<String> parts = List.of(trans.split(regex, -1));
                 State currentState = new State(parts.get(0));
                 String readSymbol = parts.get(1);
@@ -47,7 +49,7 @@ public class TuringMachine {
                 this.program.addTransition(new Transition(currentState, readSymbol.charAt(0), nextState, writeSymbol.charAt(0), Transition.stringToAction(action)));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error in loading transitions");
+            throw new TuringMachineException("Error in loading transitions");
         }
     }
 
@@ -59,6 +61,7 @@ public class TuringMachine {
     }
 
     public Simulation run(String input){
+        int maxSteps = SimulationConfig.maxSteps;
         Simulation resultSimulation = new Simulation();
         tape.placeText(input);
 
@@ -72,7 +75,7 @@ public class TuringMachine {
             try{
                 currentTransition = program.getTransitionByLeftSide(currentState, readChar).orElseThrow();
             } catch (Exception e) {
-                throw new RuntimeException("call to non-existing transition from: " + currentState.getName() + " ; " + readChar);
+                throw new TuringMachineException("call to non-existing transition from: " + currentState.name() + " ; " + readChar);
             }
 
             //Write character under head based on Transition
@@ -104,7 +107,61 @@ public class TuringMachine {
             }else if(currentState.equals(rejectState)){
                 resultSimulation.setOutput(false);
                 break;
-            }else if(SimulationRules.maxSteps == resultSimulation.getSteps().size()){
+            }else if(maxSteps == resultSimulation.getSteps().size()){
+                break;
+            }
+
+        }
+        return resultSimulation;
+    }
+
+    public Simulation run(String input, int maxSteps){
+        Simulation resultSimulation = new Simulation();
+        tape.placeText(input);
+
+        State currentState = initialState;
+        char readChar;
+        Transition currentTransition;
+        while(true){
+
+            //Find whole Transition based on current state and character read by head
+            readChar = tape.readHead();
+            try{
+                currentTransition = program.getTransitionByLeftSide(currentState, readChar).orElseThrow();
+            } catch (Exception e) {
+                throw new TuringMachineException("call to non-existing transition from: " + currentState.name() + " ; " + readChar);
+            }
+
+            //Write character under head based on Transition
+            tape.writeOnHead(currentTransition.getWriteSymbol());
+
+            //Move head based on found Transition
+            Transition.TransitionAction simulationAction = currentTransition.getAction();
+            switch (currentTransition.getAction()){
+                case RIGHT:
+                    tape.moveHeadRight();
+                    break;
+                case LEFT:
+                    tape.moveHeadLeft();
+                    break;
+                case STAY:
+                    break;
+                default:
+                    break;
+            }
+
+            //modify current state and save simulation step
+            currentState = currentTransition.getNextState();
+            resultSimulation.addStep(new SimulationStep(currentState, simulationAction));
+
+            //decide if program should be stopped
+            if(currentState.equals(acceptState)){
+                resultSimulation.setOutput(true);
+                break;
+            }else if(currentState.equals(rejectState)){
+                resultSimulation.setOutput(false);
+                break;
+            }else if(maxSteps == resultSimulation.getSteps().size()){
                 break;
             }
 
