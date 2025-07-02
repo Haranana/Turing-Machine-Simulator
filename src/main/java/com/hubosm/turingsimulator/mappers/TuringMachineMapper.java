@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Component
 public class TuringMachineMapper {
-    TuringMachine createDtoToDomain(CreateTuringMachineDto dto){
+    public TuringMachine createDtoToDomain(CreateTuringMachineDto dto){
         return new TuringMachine(dto.getInitialState(),
                 dto.getAcceptState(),
                 dto.getRejectState(),

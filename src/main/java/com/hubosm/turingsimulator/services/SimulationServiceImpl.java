@@ -17,7 +17,7 @@ import java.util.concurrent.BlockingQueue;
 @RequiredArgsConstructor
 public class SimulationServiceImpl{
 
-    private final static Duration TTL = Duration.ofHours(2);
+    private final static Duration DEFAULT_TTL = Duration.ofHours(2);
     private final BlockingQueue<UUID> jobQueue;
     private final CacheServiceImpl cacheService;
 
@@ -29,7 +29,7 @@ public class SimulationServiceImpl{
         cacheService.saveAllHash(jobId,
                 Map.of("status" , "QUEUED",
                         "timestamp",    Instant.now().toString()));
-        cacheService.setTTL(jobId , "meta", TTL);
+        cacheService.setTTL(jobId , "meta", DEFAULT_TTL);
         jobQueue.add(jobId);
         return jobId;
     }
