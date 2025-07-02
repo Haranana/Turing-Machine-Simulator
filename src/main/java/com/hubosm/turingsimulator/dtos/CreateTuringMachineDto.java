@@ -25,4 +25,5 @@ public class CreateTuringMachineDto {
     private Collection<String> program;
     @NotNull
     private Character separator;
+    private String input;
 }
