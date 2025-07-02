@@ -183,8 +183,8 @@ public class TuringMachine {
 
             //Initialize variables to be saved in dto
             int stepTapeIndex = 0;
-            char stepAction;
-            char stepWrittenChar;
+            String stepAction;
+            String stepWrittenChar;
             String stepStateBefore;
             String stepStateAfter;
 
@@ -198,25 +198,22 @@ public class TuringMachine {
             }
 
             //Write character under head based on Transition
-            stepWrittenChar = currentTransition.getWriteSymbol();
-            tape.writeOnHead(stepWrittenChar);
+            stepWrittenChar = String.valueOf(currentTransition.getWriteSymbol());
+            tape.writeOnHead(currentTransition.getWriteSymbol());
 
             //Move head based on found Transition
             Transition.TransitionAction simulationAction = currentTransition.getAction();
             switch (currentTransition.getAction()){
                 case RIGHT:
                     tape.moveHeadRight();
-                    stepAction = 'R';
+                    stepAction = "R";
                     break;
                 case LEFT:
-                    stepAction = 'L';
+                    stepAction = "L";
                     tape.moveHeadLeft();
                     break;
-                case STAY:
-                    stepAction = 'S';
-                    break;
                 default:
-                    stepAction = 'S';
+                    stepAction = "S";
                     break;
             }
 
@@ -225,7 +222,7 @@ public class TuringMachine {
             stepStateBefore = currentState.name();
             currentState = currentTransition.getNextState();
             stepStateAfter = currentState.name();
-            onStepUpdate.accept(curStep, new SimulationStepDto(0 ,stepAction, readChar, stepWrittenChar, stepStateBefore, stepStateAfter));
+            onStepUpdate.accept(curStep, new SimulationStepDto(0 ,stepAction, String.valueOf(readChar), stepWrittenChar, stepStateBefore, stepStateAfter));
 
             //decide if program should be stopped
             if(currentState.equals(acceptState) || currentState.equals(rejectState) || maxSteps == curStep) {

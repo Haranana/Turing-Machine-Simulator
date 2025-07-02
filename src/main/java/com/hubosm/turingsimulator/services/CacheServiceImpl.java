@@ -1,6 +1,6 @@
 package com.hubosm.turingsimulator.services;
 
-import com.hubosm.turingsimulator.dtos.SimulationStepDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,13 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class CacheServiceImpl {
+@RequiredArgsConstructor
+public class CacheServiceImpl implements CacheService {
+
     private final RedisTemplate<String, Object> redis;
     private static final int defaultHoursTTL = 2;
 
-    public CacheServiceImpl() {
-        redis = new RedisTemplate<>();
-    }
 
     public void saveDefObject(UUID jobId, Object object, Duration TTL){
         redis.opsForValue().set(redisKey(jobId, "def") , object , TTL);

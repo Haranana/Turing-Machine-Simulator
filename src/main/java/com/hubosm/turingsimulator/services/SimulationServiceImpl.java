@@ -25,7 +25,7 @@ public class SimulationServiceImpl{
     public UUID queueSimulation(CreateTuringMachineDto dto){
         UUID jobId = UUID.randomUUID();
 
-        cacheService.saveDefObject(jobId, dto);
+        cacheService.saveDefObject(jobId, dto, DEFAULT_TTL);
         cacheService.saveAllHash(jobId,
                 Map.of("status" , "QUEUED",
                         "timestamp",    Instant.now().toString()));

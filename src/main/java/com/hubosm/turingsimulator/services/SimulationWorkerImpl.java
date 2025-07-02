@@ -20,7 +20,7 @@ import java.util.concurrent.BlockingQueue;
 public class SimulationWorkerImpl implements Runnable, SimulationWorker {
 
     private final BlockingQueue<UUID> jobQueue;
-    private final List<SimulationStepDto> buffer = new ArrayList<>();
+
     private final SimulationRunnerImpl simulationRunner;
     private final CacheServiceImpl cacheService;
     private static final Duration DEFAULT_TTL = Duration.ofHours(2);
@@ -37,11 +37,12 @@ public class SimulationWorkerImpl implements Runnable, SimulationWorker {
             UUID jobId = jobQueue.take();
             CreateTuringMachineDto dto = (CreateTuringMachineDto) cacheService.getDefObject(jobId);
             if(dto == null) continue;
-            cacheService.saveHash(jobId, "status" , "RUNNING");
+            cacheService.saveHash(jobId, "meta", "status" , "RUNNING");
 
+            List<SimulationStepDto> buffer = new ArrayList<>();
             simulationRunner.run(dto, (stepId, stepDto)->{
                 buffer.add(stepDto);
-                if(buffer.size()>BATCH){
+                if(buffer.size()>=BATCH){
                     flush(jobId,buffer);
                 }
             });
