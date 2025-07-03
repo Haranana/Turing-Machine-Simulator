@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/simulations")
 @RequiredArgsConstructor
-public class TuringMachineRestController {
+public class SimulationRestController {
 
     private final SimulationServiceImpl simulationService;
 

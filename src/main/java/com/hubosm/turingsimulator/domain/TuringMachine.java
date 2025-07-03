@@ -225,7 +225,7 @@ public class TuringMachine {
             onStepUpdate.accept(curStep, new SimulationStepDto(0 ,stepAction, String.valueOf(readChar), stepWrittenChar, stepStateBefore, stepStateAfter));
 
             //decide if program should be stopped
-            if(currentState.equals(acceptState) || currentState.equals(rejectState) || maxSteps == curStep) {
+            if(currentState.equals(acceptState) || currentState.equals(rejectState) || maxSteps <= curStep) {
                 break;
             }
         }

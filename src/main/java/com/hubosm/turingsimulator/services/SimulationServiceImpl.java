@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 
 @Service
 @RequiredArgsConstructor
-public class SimulationServiceImpl{
+public class SimulationServiceImpl implements SimulationService{
 
     private final static Duration DEFAULT_TTL = Duration.ofHours(2);
     private final BlockingQueue<UUID> jobQueue;

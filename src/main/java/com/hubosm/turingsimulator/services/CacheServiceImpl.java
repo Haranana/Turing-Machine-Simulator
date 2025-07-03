@@ -50,7 +50,7 @@ public class CacheServiceImpl implements CacheService {
     }
 
     public void saveAllList(UUID jobId, String keySuffix, List<?> values){
-        redis.opsForList().rightPushAll(redisKey(jobId, keySuffix), values);
+        redis.opsForList().rightPushAll(redisKey(jobId, keySuffix), values.toArray());
     }
 
     public List<?> getList(UUID jobId, String keySuffix){

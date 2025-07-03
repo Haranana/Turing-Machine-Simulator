@@ -33,24 +33,35 @@ public class SimulationWorkerImpl implements Runnable, SimulationWorker {
 
     @Override
     public void run() {
-        while(true) try{
-            UUID jobId = jobQueue.take();
-            CreateTuringMachineDto dto = (CreateTuringMachineDto) cacheService.getDefObject(jobId);
-            if(dto == null) continue;
-            cacheService.saveHash(jobId, "meta", "status" , "RUNNING");
-
+        while(true) {
+            UUID jobId = null;
+            try {
+                jobId = jobQueue.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             List<SimulationStepDto> buffer = new ArrayList<>();
-            simulationRunner.run(dto, (stepId, stepDto)->{
-                buffer.add(stepDto);
-                if(buffer.size()>=BATCH){
-                    flush(jobId,buffer);
-                }
-            });
-            flush(jobId,buffer);
-            cacheService.saveAllHash(jobId, Map.of("status" , "DONE","timestamp" , Instant.now().toString()));
-            cacheService.setTTL(jobId, "meta" , DEFAULT_TTL);
-        } catch (Exception e){
-            throw new SimulatorWorkerException(e.getMessage());
+            try {
+                CreateTuringMachineDto dto = (CreateTuringMachineDto) cacheService.getDefObject(jobId);
+                if (dto == null) continue;
+                cacheService.saveHash(jobId, "meta", "status", "RUNNING");
+
+
+                UUID finalJobId = jobId;
+                simulationRunner.run(dto, (stepId, stepDto) -> {
+                    buffer.add(stepDto);
+                    if (buffer.size() >= BATCH) {
+                        flush(finalJobId, buffer);
+                    }
+                });
+                flush(jobId, buffer);
+                cacheService.saveAllHash(jobId, Map.of("status", "DONE", "timestamp", Instant.now().toString()));
+                cacheService.setTTL(jobId, "meta", DEFAULT_TTL);
+            } catch (Exception e) {
+                flush(jobId, buffer);
+                cacheService.saveAllHash(jobId, Map.of("status", "FAILED", "timestamp", Instant.now().toString()));
+                cacheService.setTTL(jobId, "meta", DEFAULT_TTL);
+            }
         }
     }
 
