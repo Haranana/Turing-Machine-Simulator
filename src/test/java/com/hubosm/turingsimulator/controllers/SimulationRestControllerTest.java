@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hubosm.turingsimulator.domain.TuringMachine;
 import com.hubosm.turingsimulator.dtos.CreateTuringMachineDto;
 import com.hubosm.turingsimulator.dtos.SimulationCreatedDto;
+import com.hubosm.turingsimulator.dtos.SimulationStatusDto;
+import com.hubosm.turingsimulator.dtos.SimulationStepDto;
 import com.hubosm.turingsimulator.services.SimulationService;
 import com.hubosm.turingsimulator.services.SimulationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SimulationRestController.class)
@@ -39,6 +42,8 @@ public class SimulationRestControllerTest {
     @MockitoBean
     private SimulationServiceImpl simulationService;
     private JacksonTester<CreateTuringMachineDto>createTmDtoJacksonTester;
+    private JacksonTester<SimulationStatusDto>simulationStatusDtoJacksonTester;
+    private JacksonTester<SimulationStepDto>simulationStepDtoJacksonTester;
     private JacksonTester<ErrorResponse> errorResponseJacksonTester;
 
     @BeforeEach
@@ -76,7 +81,6 @@ public class SimulationRestControllerTest {
     @DisplayName("simulate() should return proper response when called with proper input")
     void shouldReturnSimulationCreatedDtoWhenCalled() throws Exception {
 
-
         CreateTuringMachineDto createDto = getFirstAndLastCharactersEqualityTmDto("101");
         UUID jobId = UUID.fromString("00000000-0000-0000-0000-000000000003");
 
@@ -88,6 +92,15 @@ public class SimulationRestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)).andExpect(status().isAccepted()).andExpect(jsonPath("$.jobId").value(jobId.toString()))
                 .andExpect(header().string("Location", "/api/simulations/"+jobId.toString()));
-        
+    }
+
+    @Test
+    @DisplayName("getStatus() should return proper response")
+    void shouldReturnSimulationStatusDtoWhenCalled() throws Exception{
+        SimulationStatusDto simulationStatusDto = new SimulationStatusDto("DONE");
+        UUID jobId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
+        mockMvc.perform(get("/api/simulations/"+jobId.toString()).contentType(MediaType.APPLICATION_JSON)
+                .content())
     }
 }
